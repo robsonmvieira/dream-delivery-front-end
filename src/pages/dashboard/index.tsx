@@ -1,6 +1,6 @@
 /* eslint-disable react/no-children-prop */
 import { useState } from "react";
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage, InferGetServerSidePropsType } from "next";
 
 import Header from "./components/header";
 import Sidebar from "./components/Sidebar";
@@ -12,14 +12,27 @@ import {
   Table,
   Thead,
   Tbody,
-  Tfoot,
   Tr,
   Th,
   Td,
-  TableCaption,
 } from "@chakra-ui/react";
+import service from "../../utils/http/api";
+import { Supplier } from "../../models/supplier.model";
+import { SupplierMapper } from "../../mappers/supplier.mapper";
 
-const DashBoard: NextPage = () => {
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const mapper = new SupplierMapper()
+  const { data } = await service.get('suppliers')
+
+  return {
+    props: {
+      suppliers: data.map((supplier: Supplier) => mapper.map(supplier))
+      }
+  }
+}
+
+const DashBoard: NextPage = ({ suppliers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [isColapsed, setIsColapsed] = useState(false);
   const [sideBarWidth, setSideBarWidth] = useState("32");
 
@@ -27,6 +40,7 @@ const DashBoard: NextPage = () => {
     setIsColapsed(!isColapsed);
     setSideBarWidth(isColapsed ? "32" : "10");
   };
+
   return (
     <Flex display="flex" direction="column">
       <Box>
@@ -52,27 +66,23 @@ const DashBoard: NextPage = () => {
             <Table size='lg' variant='unstyled'>
               <Thead>
                 <Tr>
-                  <Th>To convert</Th>
-                  <Th>into</Th>
-                  <Th isNumeric>multiply by</Th>
+                  <Th>Nome</Th>
+                  <Th>CNPJ</Th>
+                  <Th>Telefone</Th>
+                  <Th>Email</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                <Tr>
-                  <Td>inches</Td>
-                  <Td>millimetres (mm)</Td>
-                  <Td isNumeric>25.4</Td>
-                </Tr>
-                <Tr>
-                  <Td>feet</Td>
-                  <Td>centimetres (cm)</Td>
-                  <Td isNumeric>30.48</Td>
-                </Tr>
-                <Tr>
-                  <Td>yards</Td>
-                  <Td>metres (m)</Td>
-                  <Td isNumeric>0.91444</Td>
-                </Tr>
+                {
+                  suppliers.map((res: Supplier) => (
+                    <Tr key={res.id}>
+                      <Td>{res.name}</Td>
+                      <Td>{ res.CNPJ }</Td>
+                      <Td >{res.phone}</Td>
+                      <Td >{res.email}</Td>
+                   </Tr>
+                  ))
+                }
               </Tbody>
             </Table>
           </Flex>
