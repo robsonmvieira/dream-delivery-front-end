@@ -1,3 +1,5 @@
+import { Address } from "./address.model"
+
 export class Supplier {
     id: string
     CNPJ: string
@@ -8,15 +10,7 @@ export class Supplier {
     isActive: boolean
     isBlocked: boolean
     isDeleted: boolean
-    address: {
-      street: string
-      number: string
-      zipCode: string
-      city: string
-      neighborhood: string
-      state: string
-      moreInfo?: string
-    }
+    address: Address
 
     constructor(data?: Partial<Supplier>) {
       if (data) {
